@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NIIT Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fffdfc;
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 550px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+    }
+    h2,
+    h3 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 30px;
+      margin: 12px 8px;
+      border: none;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      color: #2c3e50;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, background 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #fad0c4, #ff9a9e);
+    }
+    #restartBtn {
+      padding: 12px 30px;
+      margin-top: 20px;
+      border: none;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      color: #2c3e50;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, background 0.3s;
+    }
+    #restartBtn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #ACB6E5, #74ebd5);
+    }
+    .option {
+      padding: 14px;
+      margin: 10px 0;
+      border: 2px solid #e1e4ea;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f9f9f9;
+      text-align: left;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .option:hover {
+      border-color: #ff9a9e;
+      background-color: #fff0f5;
+    }
+    .option.selected {
+      background: #dff9fb;
+      border-color: #00cec9;
+      font-weight: bold;
+    }
+    #timer {
+      font-weight: bold;
+      color: #e74c3c;
+      font-size: 20px;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin: 20px 0;
+      font-size: 15px;
+      color: #34495e;
+    }
+    ul {
+      text-align: left;
+      padding-left: 20px;
+      color: #2c3e50;
+    }
+    .hidden {
+      display: none;
+    }
+    #answerReview p {
+      text-align: left;
+      background: #fcf8f3;
+      padding: 12px;
+      border-left: 6px solid #ff9a9e;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="startMenu">
+    <h2>Select Quiz Subject</h2>
+    <button onclick="selectSubject('math')">Math</button>
+    <button onclick="selectSubject('science')">Science</button>
+    <button onclick="selectSubject('social')">Social Studies</button>
+  </div>
+
+  <div class="container hidden" id="warningPage">
+    <h3>Before You Start</h3>
+    <ul>
+      <li>You will have 2 minutes to complete the quiz.</li>
+      <li>You cannot go back to previous questions.</li>
+      <li>Your answers will be auto-submitted when time runs out.</li>
+    </ul>
+    <label><input type="checkbox" id="confirmCheckbox" /> I understand and want to continue.</label>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="container hidden" id="quizPage">
+    <div id="timer">Time Left: 2:00</div>
+    <div id="questionText"></div>
+    <div id="options"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+    <button id="submitBtn" onclick="submitQuiz()" style="display:none">Submit</button>
+  </div>
+
+  <div class="container hidden" id="resultPage">
+    <h2>Quiz Complete!</h2>
+    <div id="scoreText"></div>
+    <div id="answerReview"></div>
+    <button id="restartBtn" onclick="restartQuiz()">Take Another Quiz</button>
+  </div>
+
+  <script>
+    const quizzes = {
+      math: [
+        { q: "2 + 2 = ?", options: ["3", "4", "5", "6"], answer: 1 },
+        { q: "5 * 3 = ?", options: ["15", "10", "8", "13"], answer: 0 },
+        { q: "12 / 4 = ?", options: ["2", "3", "4", "5"], answer: 1 },
+        { q: "7 - 5 = ?", options: ["1", "2", "3", "4"], answer: 1 },
+        { q: "Square root of 81?", options: ["7", "8", "9", "10"], answer: 2 },
+        { q: "10 + 15 = ?", options: ["20", "25", "30", "35"], answer: 1 },
+        { q: "6 * 6 = ?", options: ["30", "36", "42", "48"], answer: 1 },
+        { q: "100 / 10 = ?", options: ["5", "8", "10", "12"], answer: 2 },
+        { q: "9 + 10 = ?", options: ["19", "20", "21", "18"], answer: 0 },
+        { q: "15 - 7 = ?", options: ["6", "7", "8", "9"], answer: 2 }
+      ],
+      science: [
+        { q: "Water's formula?", options: ["CO2", "H2O", "O2", "NaCl"], answer: 1 },
+        { q: "Sun is a?", options: ["Planet", "Star", "Comet", "Asteroid"], answer: 1 },
+        { q: "Plants make food via?", options: ["Respiration", "Photosynthesis", "Digestion", "Fermentation"], answer: 1 },
+        { q: "What gas do humans breathe in?", options: ["Oxygen", "Nitrogen", "Carbon dioxide", "Helium"], answer: 0 },
+        { q: "The human heart has how many chambers?", options: ["2", "3", "4", "5"], answer: 2 },
+        { q: "Earth is in which galaxy?", options: ["Andromeda", "Milky Way", "Whirlpool", "Sombrero"], answer: 1 },
+        { q: "What is H2SO4?", options: ["Water", "Sulfuric acid", "Salt", "Sugar"], answer: 1 },
+        { q: "Light travels fastest in?", options: ["Air", "Water", "Vacuum", "Glass"], answer: 2 },
+        { q: "What do bees produce?", options: ["Milk", "Honey", "Wax", "Silk"], answer: 1 },
+        { q: "What organ filters blood?", options: ["Liver", "Heart", "Kidneys", "Lungs"], answer: 2 }
+      ],
+      social: [
+        { q: "Capital of India?", options: ["Mumbai", "Delhi", "Chennai", "Kolkata"], answer: 1 },
+        { q: "Who was Gandhi?", options: ["Freedom Fighter", "Scientist", "King", "Poet"], answer: 0 },
+        { q: "Father of Constitution?", options: ["Nehru", "Ambedkar", "Patel", "Bose"], answer: 1 },
+        { q: "Which year did India gain independence?", options: ["1945", "1947", "1950", "1960"], answer: 1 },
+        { q: "The Taj Mahal is located in?", options: ["Agra", "Delhi", "Jaipur", "Lucknow"], answer: 0 },
+        { q: "Largest continent?", options: ["Africa", "Asia", "Europe", "Antarctica"], answer: 1 },
+        { q: "Who was the first Prime Minister of India?", options: ["Nehru", "Gandhi", "Patel", "Azad"], answer: 0 },
+        { q: "The Indian Parliament is called?", options: ["Lok Sabha", "Rajya Sabha", "Sansad", "Vidhan Sabha"], answer: 2 },
+        { q: "Which is the longest river in India?", options: ["Ganga", "Yamuna", "Brahmaputra", "Godavari"], answer: 0 },
+        { q: "Which festival is known as 'Festival of Lights'?", options: ["Holi", "Diwali", "Eid", "Christmas"], answer: 1 }
+      ]
+    };
+
+    let currentQuiz = [];
+    let currentQuestion = 0;
+    let userAnswers = [];
+    let timer;
+    let timeLeft = 120;
+
+    function selectSubject(subject) {
+      currentQuiz = quizzes[subject];
+      document.getElementById('startMenu').classList.add('hidden');
+      document.getElementById('warningPage').classList.remove('hidden');
+    }
+
+    function startQuiz() {
+      if (!document.getElementById('confirmCheckbox').checked) {
+        alert('Please confirm you understood the instructions.');
+        return;
+      }
+      document.getElementById('warningPage').classList.add('hidden');
+      document.getElementById('quizPage').classList.remove('hidden');
+      currentQuestion = 0;
+      userAnswers = [];
+      timeLeft = 120;
+      showQuestion();
+      startTimer();
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        document.getElementById('timer').innerText = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          alert("Time's up! Auto-submitting your quiz.");
+          submitQuiz();
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      const question = currentQuiz[currentQuestion];
+      const labels = ['A.', 'B.', 'C.', 'D.'];
+      document.getElementById('questionText').innerText = `Q${currentQuestion + 1}: ${question.q}`;
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      question.options.forEach((opt, idx) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.innerText = `${labels[idx]} ${opt}`;
+        div.onclick = () => selectOption(div, idx);
+        if (userAnswers[currentQuestion] === idx) {
+          div.classList.add('selected');
+        }
+        optionsDiv.appendChild(div);
+      });
+
+      // Toggle next and submit buttons
+      document.getElementById('nextBtn').style.display =
+        currentQuestion < currentQuiz.length - 1 ? 'inline-block' : 'none';
+      document.getElementById('submitBtn').style.display =
+        currentQuestion === currentQuiz.length - 1 ? 'inline-block' : 'none';
+    }
+
+    function selectOption(el, index) {
+      Array.from(document.getElementsByClassName('option')).forEach((opt) => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      userAnswers[currentQuestion] = index;
+    }
+
+    function nextQuestion() {
+      if (userAnswers[currentQuestion] === undefined) {
+        alert('Please select an option before continuing.');
+        return;
+      }
+      currentQuestion++;
+      showQuestion();
+    }
+
+    function submitQuiz() {
+      if (userAnswers[currentQuestion] === undefined) {
+        alert('Please select an option before submitting.');
+        return;
+      }
+      clearInterval(timer);
+      showResult();
+    }
+
+    function showResult() {
+      document.getElementById('quizPage').classList.add('hidden');
+      document.getElementById('resultPage').classList.remove('hidden');
+      let score = 0;
+      const review = document.getElementById('answerReview');
+      review.innerHTML = '';
+      currentQuiz.forEach((q, idx) => {
+        const userAns = userAnswers[idx];
+        const correct = q.answer;
+        if (userAns === correct) score++;
+        review.innerHTML += `<p><strong>Q${idx + 1}:</strong> ${q.q}<br><strong>Correct Answer:</strong> ${
+          q.options[correct]
+        }<br><strong>Your Answer:</strong> ${userAns !== undefined ? q.options[userAns] : 'Not Answered'}</p>`;
+      });
+      document.getElementById('scoreText').innerText = `Your Score: ${score} / ${currentQuiz.length}`;
+    }
+
+    function restartQuiz() {
+      currentQuiz = [];
+      currentQuestion = 0;
+      userAnswers = [];
+      timeLeft = 120;
+      clearInterval(timer);
+
+      document.getElementById('resultPage').classList.add('hidden');
+      document.getElementById('warningPage').classList.add('hidden');
+      document.getElementById('quizPage').classList.add('hidden');
+
+      document.getElementById('startMenu').classList.remove('hidden');
+      document.getElementById('confirmCheckbox').checked = false;
+    }
+  </script>
+</body>
+</html>
